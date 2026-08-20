@@ -1,0 +1,33 @@
+# RepoSentinel - core runtime dependencies
+# Python >= 3.11 required (LangGraph + modern typing)
+
+# --- Web / API layer ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+sse-starlette==2.2.1
+python-multipart==0.0.20
+
+# --- Data modelling / config ---
+pydantic==2.10.4
+pydantic-settings==2.7.0
+python-dotenv==1.0.1
+
+# --- Agent orchestration ---
+langgraph==0.2.60
+langgraph-checkpoint-sqlite==2.0.1
+langchain-core==0.3.28
+
+# --- Model providers (modular; only the configured one is used at runtime) ---
+openai==1.59.3
+httpx==0.28.1
+
+# --- Retrieval ---
+numpy==2.2.1
+tiktoken==0.8.0
+
+# --- Quality / security tooling executed by the agent sandbox ---
+pytest==8.3.4
+ruff==0.8.6
+
+# --- Test tooling for RepoSentinel's own suite ---
+pytest-asyncio==0.25.1

@@ -1,0 +1,15 @@
+# RepoSentinel - optional backends.
+#
+# Everything in this file is genuinely optional: RepoSentinel detects each
+# backend at runtime and falls back to a supported alternative when missing.
+# See README "Optional backends" for exactly what each one upgrades.
+
+# PostgreSQL + pgvector vector store (alternative to the default SQLite store).
+# Enable with REPOSENTINEL_VECTOR_STORE=pgvector
+psycopg[binary]==3.2.3
+pgvector==0.3.6
+
+# Semgrep static security analysis (alternative to the built-in AST scanner).
+# Not available as a wheel on Windows; installs on Linux/macOS and in Docker.
+# Enable with REPOSENTINEL_SECURITY_BACKEND=semgrep
+semgrep==1.99.0

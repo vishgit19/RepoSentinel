@@ -1,0 +1,50 @@
+{
+  "id": "logic_bug",
+  "title": "Expired session tokens are still authenticated",
+  "category": "logic_bug",
+  "issue_id": "RS-101",
+  "difficulty": "easy",
+  "issue": "Users with an expired session token are still being authenticated. A token whose expires_at timestamp is in the past is accepted by the API and /me returns 200 instead of 401. Three tests in tests/test_auth.py are failing.",
+  "repo_dir": "repo",
+  "language": "python",
+  "gold_files": [
+    "app/auth/token.py"
+  ],
+  "gold_symbols": [
+    "SessionToken.is_expired"
+  ],
+  "supporting_files": [
+    "app/auth/middleware.py",
+    "tests/test_auth.py"
+  ],
+  "targeted_tests": [
+    "tests/test_auth.py"
+  ],
+  "regression_tests": [
+    "tests/test_users.py"
+  ],
+  "expected_failing_tests": [
+    "tests/test_auth.py::test_token_expires_at_its_deadline",
+    "tests/test_auth.py::test_expired_token_is_rejected_by_validate_token",
+    "tests/test_auth.py::test_api_returns_401_for_expired_token"
+  ],
+  "baseline_seed_files": [
+    "app/auth/token.py",
+    "app/auth/middleware.py"
+  ],
+  "security_scan_required": false,
+  "expects_injection": false,
+  "expected_retry": false,
+  "gold_patch_hint": "SessionToken.is_expired adds SESSION_TTL_SECONDS to expires_at, doubling the effective session lifetime. The comparison should be `current > self.expires_at`.",
+  "expected_behaviour": [
+    "search auth code",
+    "identify token validation",
+    "inspect tests",
+    "reproduce failure",
+    "locate incorrect expiry comparison",
+    "patch",
+    "run targeted tests",
+    "run full tests",
+    "verify"
+  ]
+}

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+.venv/
+venv/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Runtime data: run workspaces, SQLite stores, embedding cache.
+# Workspaces in particular are throwaway git repositories of their own and must
+# never be tracked by the outer repository.
+data/
+
+# Local credentials
+.env
+.env.*
+!.env.example
+
+# Frontend
+node_modules/

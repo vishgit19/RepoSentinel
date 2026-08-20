@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RepoSentinel — Agentic Secure Code Repair</title>
+    <meta
+      name="description"
+      content="An agent that inspects a repository, proposes a patch, runs tests and a security scan, then waits for a human to approve."
+    />
+    <meta name="theme-color" content="#0b0e14" />
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <!--
+      React and htm are vendored under /static/vendor rather than pulled from a
+      CDN: there is no Node toolchain in this environment, and a live demo must
+      not depend on network access to a third party. htm gives JSX-like tagged
+      templates so no build step is needed.
+    -->
+    <script src="/static/vendor/react.production.min.js"></script>
+    <script src="/static/vendor/react-dom.production.min.js"></script>
+    <script src="/static/vendor/htm.umd.js"></script>
+  </head>
+  <body>
+    <div id="root">
+      <div class="boot">Loading RepoSentinel…</div>
+    </div>
+    <script type="module" src="/static/app.js"></script>
+  </body>
+</html>

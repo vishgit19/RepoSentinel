@@ -1,0 +1,121 @@
+# Semgrep rules mirroring RepoSentinel's built-in AST analyser.
+#
+# Used when the `semgrep` executable is available (Linux/macOS/Docker).
+# Rule ids match the built-in scanner so reports are comparable across
+# backends.
+rules:
+  - id: python.sql-injection
+    languages: [python]
+    severity: ERROR
+    message: >-
+      SQL query is built with string interpolation; use parameterised queries
+      instead.
+    metadata:
+      cwe: "CWE-89"
+      category: security
+    patterns:
+      - pattern-either:
+          - pattern: $CURSOR.execute(f"...{$X}...", ...)
+          - pattern: $CURSOR.execute("..." % $X, ...)
+          - pattern: $CURSOR.execute("..." + $X, ...)
+          - pattern: $CURSOR.execute("...".format(...), ...)
+          - pattern: $CURSOR.executescript(f"...{$X}...", ...)
+          - pattern: $CURSOR.executemany(f"...{$X}...", ...)
+
+  - id: python.command-injection
+    languages: [python]
+    severity: ERROR
+    message: >-
+      Shell command built from a dynamic value; avoid shell=True and pass an
+      argv list.
+    metadata:
+      cwe: "CWE-78"
+      category: security
+    patterns:
+      - pattern-either:
+          - pattern: os.system(f"...{$X}...")
+          - pattern: os.system("..." % $X)
+          - pattern: os.system("..." + $X)
+          - pattern: subprocess.run(..., shell=True, ...)
+          - pattern: subprocess.Popen(..., shell=True, ...)
+          - pattern: subprocess.call(..., shell=True, ...)
+          - pattern: subprocess.check_output(..., shell=True, ...)
+
+  - id: python.dangerous-eval
+    languages: [python]
+    severity: ERROR
+    message: Dynamic code execution via eval/exec on a non-literal value.
+    metadata:
+      cwe: "CWE-95"
+      category: security
+    patterns:
+      - pattern-either:
+          - pattern: eval($X)
+          - pattern: exec($X)
+      - pattern-not: eval("...")
+      - pattern-not: exec("...")
+
+  - id: python.insecure-deserialization
+    languages: [python]
+    severity: ERROR
+    message: Deserialising untrusted data with pickle or yaml.load is unsafe.
+    metadata:
+      cwe: "CWE-502"
+      category: security
+    patterns:
+      - pattern-either:
+          - pattern: pickle.loads(...)
+          - pattern: pickle.load(...)
+          - pattern: yaml.load($X)
+
+  - id: python.hardcoded-secret
+    languages: [python]
+    severity: WARNING
+    message: Hard-coded credential assigned in source.
+    metadata:
+      cwe: "CWE-798"
+      category: security
+    patterns:
+      - pattern-either:
+          - pattern: $PASSWORD = "..."
+          - pattern: $SECRET = "..."
+      - metavariable-regex:
+          metavariable: $PASSWORD
+          regex: (?i).*(password|passwd|secret|api_key|apikey|token|private_key).*
+
+  - id: python.weak-hash
+    languages: [python]
+    severity: WARNING
+    message: Weak hash function used; prefer sha256 or a password KDF.
+    metadata:
+      cwe: "CWE-327"
+      category: security
+    patterns:
+      - pattern-either:
+          - pattern: hashlib.md5(...)
+          - pattern: hashlib.sha1(...)
+
+  - id: python.tls-verify-disabled
+    languages: [python]
+    severity: ERROR
+    message: TLS certificate verification is disabled.
+    metadata:
+      cwe: "CWE-295"
+      category: security
+    patterns:
+      - pattern: $F(..., verify=False, ...)
+
+  - id: python.insecure-random
+    languages: [python]
+    severity: WARNING
+    message: >-
+      Non-cryptographic randomness used for a security value; use the secrets
+      module.
+    metadata:
+      cwe: "CWE-338"
+      category: security
+    patterns:
+      - pattern-either:
+          - pattern: random.random(...)
+          - pattern: random.randint(...)
+          - pattern: random.choice(...)

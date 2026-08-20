@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reposentinel"
+version = "0.1.0"
+description = "Agentic secure code repair and verification"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "vishgit19" }]
+keywords = [
+    "agent",
+    "code-repair",
+    "langgraph",
+    "retrieval",
+    "security",
+    "verification",
+]
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/vishgit19/RepoSentinel"
+Issues = "https://github.com/vishgit19/RepoSentinel/issues"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+include = ["reposentinel*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["backend"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# Benchmark repositories contain deliberately defective code; never lint them.
+extend-exclude = ["benchmarks", "data", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["B008", "E501"]

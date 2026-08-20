@@ -1,0 +1,53 @@
+{
+  "id": "cache_bug",
+  "title": "Cached articles leak between locales",
+  "category": "cross_file_bug",
+  "issue_id": "RS-204",
+  "difficulty": "medium",
+  "issue": "Readers are being served the wrong language. After someone requests an article in English, a request for the same article in German returns the English text. It looks like both locales end up in the same cache entry, and only one entry is created for the article instead of one per locale. Four tests in tests/test_content_cache.py are failing. tests/test_cache_store.py passes, so the cache store itself appears to behave correctly.",
+  "repo_dir": "repo",
+  "language": "python",
+  "gold_files": [
+    "app/cache/keys.py"
+  ],
+  "gold_symbols": [
+    "make_key"
+  ],
+  "supporting_files": [
+    "app/content/service.py",
+    "app/cache/store.py",
+    "tests/test_content_cache.py"
+  ],
+  "targeted_tests": [
+    "tests/test_content_cache.py"
+  ],
+  "regression_tests": [
+    "tests/test_cache_store.py"
+  ],
+  "expected_failing_tests": [
+    "tests/test_content_cache.py::test_cache_key_includes_every_variant",
+    "tests/test_content_cache.py::test_reading_two_locales_returns_each_locale",
+    "tests/test_content_cache.py::test_second_locale_is_not_served_from_the_first_locales_entry",
+    "tests/test_content_cache.py::test_each_locale_gets_its_own_cache_entry"
+  ],
+  "baseline_seed_files": [
+    "app/content/service.py",
+    "app/cache/store.py"
+  ],
+  "security_scan_required": false,
+  "expects_injection": false,
+  "expected_retry": false,
+  "gold_patch_hint": "make_key returns only parts.prefix() and discards parts.variants entirely, so every locale of an article collapses onto the key 'article:<id>'. It must append the sorted variants, e.g. 'article:a1|locale=en'. The symptom appears in app/content/service.py but the defect is in app/cache/keys.py; note that invalidate() depends on prefix() staying a prefix of the full key.",
+  "expected_behaviour": [
+    "search cache and content code",
+    "read the failing tests",
+    "reproduce failure",
+    "follow service.get_article into make_key across files",
+    "notice variants are dropped from the key",
+    "patch keys.py rather than the symptom site",
+    "check prefix invalidation still works",
+    "run targeted tests",
+    "run full tests",
+    "verify"
+  ]
+}

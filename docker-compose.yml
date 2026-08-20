@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      REPOSENTINEL_SANDBOX_BACKEND: local
+      REPOSENTINEL_VECTOR_STORE: sqlite
+    volumes:
+      - sentinel-data:/app/data
+
+volumes:
+  sentinel-data:

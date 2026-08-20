@@ -1,0 +1,52 @@
+{
+  "id": "retry_bug",
+  "title": "HTTP client retries permanent errors and never backs off",
+  "category": "logic_bug",
+  "issue_id": "RS-410",
+  "difficulty": "hard",
+  "issue": "Our outbound HTTP client is retrying 404s and hammering a rate-limited endpoint with no delay. 404 should fail immediately. 429 and 5xx should be retried, up to MAX_ATTEMPTS, with exponential backoff (BASE_DELAY_SECONDS * 2 ** attempt). tests/test_retry.py is failing. A patch that only stops retrying 4xx will still fail: 429 is transient, and backoff_seconds currently returns a constant.",
+  "repo_dir": "repo",
+  "language": "python",
+  "gold_files": [
+    "app/http/retry.py"
+  ],
+  "gold_symbols": [
+    "is_transient",
+    "backoff_seconds"
+  ],
+  "supporting_files": [
+    "app/http/client.py",
+    "tests/test_retry.py"
+  ],
+  "targeted_tests": [
+    "tests/test_retry.py"
+  ],
+  "regression_tests": [
+    "tests/test_client.py"
+  ],
+  "expected_failing_tests": [
+    "tests/test_retry.py::test_permanent_client_errors_are_not_transient",
+    "tests/test_retry.py::test_404_is_not_retried",
+    "tests/test_retry.py::test_backoff_doubles_each_attempt",
+    "tests/test_retry.py::test_client_records_exponential_delays"
+  ],
+  "baseline_seed_files": [
+    "app/http/retry.py",
+    "app/http/client.py"
+  ],
+  "security_scan_required": false,
+  "expects_injection": false,
+  "expected_retry": true,
+  "gold_patch_hint": "Two independent defects in app/http/retry.py. is_transient currently returns status_code >= 400, which retries 404/400/403; the correct rule is 500-599 or 429. backoff_seconds currently returns BASE_DELAY_SECONDS constantly; it must return BASE_DELAY_SECONDS * (2 ** attempt). A first patch that only tightens is_transient to status >= 500 will still fail the 429 and backoff tests, which is the point of this benchmark: the agent must diagnose the remaining failures and patch again.",
+  "expected_behaviour": [
+    "read failing tests",
+    "reproduce failures",
+    "patch is_transient (often the incomplete first attempt)",
+    "observe remaining 429 and backoff failures",
+    "diagnose",
+    "patch backoff_seconds and 429",
+    "run targeted tests",
+    "run full tests",
+    "verify"
+  ]
+}

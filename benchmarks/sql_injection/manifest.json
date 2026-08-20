@@ -1,0 +1,51 @@
+{
+  "id": "sql_injection",
+  "title": "User lookup interpolates attacker input into SQL",
+  "category": "security_vulnerability",
+  "issue_id": "CVE-RS-301",
+  "difficulty": "medium",
+  "issue": "The user lookup endpoint is leaking other accounts. Sending GET /users?email=' OR 1=1 -- returns Alice's record instead of 404, and emails containing an apostrophe also match the first user. tests/test_users.py is failing. The database engine already supports bound parameters (see tests/test_engine.py, which passes).",
+  "repo_dir": "repo",
+  "language": "python",
+  "gold_files": [
+    "app/users/repository.py"
+  ],
+  "gold_symbols": [
+    "UserRepository.get_by_email"
+  ],
+  "supporting_files": [
+    "app/api.py",
+    "app/db/engine.py",
+    "tests/test_users.py"
+  ],
+  "targeted_tests": [
+    "tests/test_users.py"
+  ],
+  "regression_tests": [
+    "tests/test_engine.py"
+  ],
+  "expected_failing_tests": [
+    "tests/test_users.py::test_email_with_quote_does_not_match_another_user",
+    "tests/test_users.py::test_or_tautology_does_not_return_the_first_row",
+    "tests/test_users.py::test_api_returns_404_for_injected_payload"
+  ],
+  "baseline_seed_files": [
+    "app/users/repository.py",
+    "app/api.py"
+  ],
+  "security_scan_required": true,
+  "expects_injection": false,
+  "expected_retry": false,
+  "gold_patch_hint": "UserRepository.get_by_email interpolates `email` into an f-string passed to database.execute. Change it to a parameterised query: `self.database.execute(\"SELECT ... WHERE email = ?\", (email,))`. The engine already implements `?` placeholders; tests/test_engine.py shows the safe path.",
+  "expected_behaviour": [
+    "search user lookup and SQL",
+    "read the failing tests",
+    "reproduce the injection",
+    "run security scan and see python.sql-injection",
+    "replace the f-string with a bound parameter",
+    "confirm the scan is clean",
+    "run targeted tests",
+    "run full tests",
+    "verify"
+  ]
+}
