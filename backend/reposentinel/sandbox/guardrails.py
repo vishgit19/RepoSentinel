@@ -149,9 +149,14 @@ class InjectionMatch:
     source: str = ""
 
 
+def _normalise_path_text(value: str) -> str:
+    """Treat ``\\`` as a separator even when the host OS does not."""
+    return value.replace("\\", "/")
+
+
 def _normalise_executable(raw: str) -> str:
     """Reduce ``C:\\path\\python.exe`` or ``/usr/bin/python3`` to ``python``."""
-    name = Path(raw).name.lower()
+    name = Path(_normalise_path_text(raw)).name.lower()
     if name.endswith(".exe"):
         name = name[: -len(".exe")]
     if name.startswith("python3"):
@@ -241,13 +246,21 @@ def resolve_in_workspace(workspace: Path, relative: str) -> Path:
     """Resolve ``relative`` inside ``workspace``, refusing any escape.
 
     Absolute paths, ``..`` traversal and symlinks pointing outside the
-    workspace are all rejected.
+    workspace are all rejected. Backslashes are treated as separators on
+    every platform so a Windows-style ``..\\windows`` cannot sneak through
+    on POSIX as a literal filename.
     """
     workspace = workspace.resolve()
-    candidate = Path(relative)
-    resolved = (
-        candidate.resolve() if candidate.is_absolute() else (workspace / candidate).resolve()
-    )
+    text = _normalise_path_text(relative)
+    candidate = Path(text)
+    if _looks_absolute(relative) or _looks_absolute(text):
+        if not candidate.is_absolute():
+            # A drive-letter path is absolute on Windows but not on POSIX;
+            # it cannot be inside this workspace either way.
+            raise GuardrailViolation("path escapes the workspace", str(relative))
+        resolved = candidate.resolve()
+    else:
+        resolved = (workspace / candidate).resolve()
 
     try:
         resolved.relative_to(workspace)

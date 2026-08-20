@@ -103,6 +103,7 @@ def run_pytest(
         "pytest",
         "-q",
         "--tb=short",
+        "--rootdir=.",
         "-p",
         "no:cacheprovider",
         f"--junitxml={JUNIT_RELATIVE}",

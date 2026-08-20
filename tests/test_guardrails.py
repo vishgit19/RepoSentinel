@@ -85,6 +85,7 @@ class TestCommandAllowList:
             # ruff's own output flag contains the word "format".
             ["ruff", "check", "--output-format=concise", "--no-cache", "app"],
             ["pytest", "--junitxml=.reposentinel/report.xml", "tests"],
+            ["pytest", "--rootdir=.", "-q", "tests"],
             ["ruff", "check", "app/format", "app/su"],
             ["pytest", "tests/test_del.py"],
         ],
@@ -143,6 +144,11 @@ class TestPathConfinement:
         (tmp_path / "app").mkdir()
         resolved = resolve_in_workspace(tmp_path, "app")
         assert resolved == (tmp_path / "app").resolve()
+
+    def test_backslash_relative_path_is_confined(self, tmp_path):
+        (tmp_path / "app" / "auth").mkdir(parents=True)
+        resolved = resolve_in_workspace(tmp_path, r"app\auth")
+        assert resolved == (tmp_path / "app" / "auth").resolve()
 
     @pytest.mark.parametrize(
         "relative",

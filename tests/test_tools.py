@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 from reposentinel.retrieval.indexer import CodeIndexer
-from reposentinel.sandbox import build_sandbox
+from reposentinel.sandbox.local import LocalSandbox
 from reposentinel.tools import registry
 from reposentinel.tools.base import ToolContext, execute_tool
 from reposentinel.workspace import Workspace
@@ -22,7 +22,7 @@ def tools_context():
         index = CodeIndexer("logic_bug", workspace.root).index(workspace.relative_files())
         yield ToolContext(
             workspace=workspace,
-            sandbox=build_sandbox(workspace.root),
+            sandbox=LocalSandbox(workspace.root),
             index=index,
             run_id="test_tools",
         )
